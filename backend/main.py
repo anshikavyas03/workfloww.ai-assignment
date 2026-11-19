@@ -2,13 +2,15 @@ import os
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from supabase import create_client
 
 from .models import CurrentUser, TaskCreate, TaskResponse, TaskStatusUpdate
 from .service import TaskService
 
 app = FastAPI(title="Multi-Tenant Task Management API", version="1.0.0")
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_task_service() -> TaskService:
@@ -20,13 +22,13 @@ def get_task_service() -> TaskService:
 
 
 def get_current_user(
-    authorization: Annotated[str | None, Header()] = None,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)] = None,
     service: TaskService = Depends(get_task_service),
 ) -> CurrentUser:
-    if not authorization or not authorization.startswith("Bearer "):
+    if credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="A Bearer access token is required")
-    return service.current_user(authorization.removeprefix("Bearer "))
+    return service.current_user(credentials.credentials)
 
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
