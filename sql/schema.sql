@@ -76,6 +76,12 @@ alter table public.companies enable row level security;
 alter table public.users enable row level security;
 alter table public.tasks enable row level security;
 
+-- Expose only the operations needed through Supabase's Data API.
+-- RLS policies below still determine which rows an authenticated user can access.
+grant usage on schema public to authenticated, service_role;
+grant select on public.companies, public.users, public.tasks to authenticated, service_role;
+grant insert, update on public.tasks to authenticated, service_role;
+
 create policy "members can view their company" on public.companies for select
   using (id = public.current_company_id());
 create policy "members can view company users" on public.users for select
