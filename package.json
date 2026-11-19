@@ -1,0 +1,14 @@
+{
+  "name": "workfloww-ai-assignment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test:ts": "tsx --test typescript/tasks.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
